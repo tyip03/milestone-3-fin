@@ -43,6 +43,8 @@ class TransactionWorker:
             result = False
             while not result:
                 result = transaction.run()
+                if not result:
+                    time.sleep(0.001)
             self.stats.append(result)
         # stores the number of transactions that committed
         self.result = len(list(filter(lambda x: x, self.stats)))
