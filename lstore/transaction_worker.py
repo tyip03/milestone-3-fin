@@ -12,6 +12,7 @@ class TransactionWorker:
         self.stats = []
         self.transactions = [] if transactions is None else list(transactions)
         self.result = 0
+        self.thread = None
 
     
     """
@@ -34,17 +35,14 @@ class TransactionWorker:
     Waits for the worker to finish
     """
     def join(self):
-        self.thread.join()      
+        if self.thread is not None:
+            self.thread.join()      
         
         
     def __run(self):
         for transaction in self.transactions:
             # each transaction returns True if committed or False if aborted
-            result = False
-            while not result:
-                result = transaction.run()
-                if not result:
-                    time.sleep(0.001)
+            result = transaction.run()
             self.stats.append(result)
         # stores the number of transactions that committed
         self.result = len(list(filter(lambda x: x, self.stats)))
