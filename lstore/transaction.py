@@ -32,6 +32,13 @@ class Transaction:
             primary_key = args[0] if len(args) > 0 else None
             table_query = Query(table)
             
+            lock_id = primary_key
+            if query_name in ["select", "update", "delete"]:
+                rids = table.index.locate(table.key, primary_key)
+                if not rids:
+                    return self.abort()
+                lock_id = rids[0]
+            
             if query_name == "select":
                 if not table.lock_manager.get_s_lock(self.tid, primary_key):
                     return self.abort()
@@ -59,7 +66,7 @@ class Transaction:
                 existing = table_query.select(primary_key, table.key, [1] * table.num_columns)
                 if existing and len(existing) > 0:
                     return self.abort()
-                self.undo_log.append(("insert", table, args[0]))
+                self.undo_log.append(("insert", table, primary_key))
                 
             result = query(*args)
             if result == False:
@@ -79,22 +86,19 @@ class Transaction:
                 restored_cols = old_vals.copy()
                 restored_cols[table.key] = None
                 table_query = Query(table)
-                if table_query.update(primary_key, *restored_cols) is False:
-                    pass
+                table_query.update(primary_key, *restored_cols)
             
             elif action == "delete":
                 _, table, old_vals = entry
                 
                 table_query = Query(table)
-                if table_query.insert(*old_vals) is False:
-                    pass
+                table_query.insert(*old_vals)
             
             elif action == "insert":
                 _, table, primary_key = entry
                 
                 table_query = Query(table)
-                if table_query.delete(primary_key) is False:
-                    pass
+                table_query.delete(primary_key)
 
         released = set()
         for _, table, _ in self.queries:
