@@ -40,10 +40,10 @@ class Transaction:
                 lock_id = rids[0]
             
             if query_name == "select":
-                if not table.lock_manager.get_s_lock(self.tid, primary_key):
+                if not table.lock_manager.get_s_lock(self.tid, lock_id):
                     return self.abort()
             elif query_name in ["update", "delete", "insert"]:
-                if not table.lock_manager.get_x_lock(self.tid, primary_key):
+                if not table.lock_manager.get_x_lock(self.tid, lock_id):
                     return self.abort()
                 
             if query_name == "update":
