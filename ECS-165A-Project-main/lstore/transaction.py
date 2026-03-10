@@ -79,19 +79,22 @@ class Transaction:
                 restored_cols = old_vals.copy()
                 restored_cols[table.key] = None
                 table_query = Query(table)
-                table_query.update(primary_key, *restored_cols)
+                if table_query.update(primary_key, *restored_cols) is False
+                    pass
             
             elif action == "delete":
                 _, table, old_vals = entry
                 
                 table_query = Query(table)
-                table_query.update(primary_key, *restored_cols)
+                if table_query.insert(*old_vals) is False
+                    pass
             
             elif action == "insert":
                 _, table, primary_key = entry
                 
                 table_query = Query(table)
-                table_query.delete(primary_key)
+                if table_query.delete(primary_key) is False
+                    pass
 
         released = set()
         for _, table, _ in self.queries:
