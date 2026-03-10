@@ -58,7 +58,7 @@ class Transaction:
             elif query_name == "insert":
                 existing = table_query.select(primary_key, table.key, [1] * table.num_columns)
                 if existing and len(existing) > 0:
-                    continue
+                    return self.abort()
                 self.undo_log.append(("insert", table, args[0]))
                 
             result = query(*args)
@@ -85,7 +85,7 @@ class Transaction:
                 _, table, old_vals = entry
                 
                 table_query = Query(table)
-                table_query.insert(*old_vals)
+                table_query.update(primary_key, *restored_cols)
             
             elif action == "insert":
                 _, table, primary_key = entry
@@ -100,7 +100,6 @@ class Transaction:
                 released.add(id(table))
         
         self.undo_log.clear()
-        self.locks.clear()
         
         return False
 
