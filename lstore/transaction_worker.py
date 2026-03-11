@@ -4,45 +4,42 @@ import threading
 import time
 
 class TransactionWorker:
-
     """
     # Creates a transaction worker object.
     """
     def __init__(self, transactions = []):
         self.stats = []
-        self.transactions = [] if transactions is None else list(transactions)
+        self.transactions = transactions
         self.result = 0
         self.thread = None
 
-    
     """
     Appends t to transactions
     """
     def add_transaction(self, t):
         self.transactions.append(t)
 
-        
     """
     Runs all transaction as a thread
     """
     def run(self):
-        # here you need to create a thread and call __run
-        self.thread = threading.Thread(target = self.__run)
+        self.thread = threading.Thread(target=self.__run)
         self.thread.start()
-    
 
     """
     Waits for the worker to finish
     """
     def join(self):
         if self.thread is not None:
-            self.thread.join()      
-        
-        
+            self.thread.join()
+
     def __run(self):
         for transaction in self.transactions:
-            # each transaction returns True if committed or False if aborted
-            result = transaction.run()
-            self.stats.append(result)
-        # stores the number of transactions that committed
+            # Spec says aborted transactions should keep retrying until commit
+            while True:
+                committed = transaction.run()
+                if committed:
+                    self.stats.append(True)
+                    break
+
         self.result = len(list(filter(lambda x: x, self.stats)))
