@@ -1,9 +1,7 @@
 from lstore.table import Table, Record
 from lstore.index import Index
-from lstore.query import Query
 
 class Transaction:
-
     """
     # Creates a transaction object.
     """
@@ -11,7 +9,6 @@ class Transaction:
         self.queries = []
         self.undo_log = []
         self._rolling_back = False
-
 
     """
     # Adds the given query to this transaction
@@ -21,10 +18,9 @@ class Transaction:
     # t.add_query(q.update, grades_table, 0, *[None, 1, None, 2, None])
     """
     def add_query(self, query, table, *args):
+        # keep the table too so we can inspect old values for rollback
         self.queries.append((query, table, args))
-        # use grades_table for aborting
 
-        
     def _build_undo_entry(self, query, table, args):
         """
         Build inverse operation BEFORE the query runs.
