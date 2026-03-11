@@ -1,7 +1,6 @@
 from lstore.table import Table, Record
 from lstore.index import Index
 import threading
-import time
 
 class TransactionWorker:
     """
